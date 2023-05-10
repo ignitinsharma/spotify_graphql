@@ -17,9 +17,3 @@ root.render(
     </BrowserRouter>
   </ApolloProvider>
 );
-
-
-// background: rgb(29,38,54);
-// background: linear-gradient(138deg, rgba(29,38,54,1) 55%, rgba(2,2,3,1) 100%);
-
-

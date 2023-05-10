@@ -1,61 +1,78 @@
-import React, { useEffect, useState } from "react";
-import { debounce } from "lodash";
+import React, { useState } from "react";
+import Sidebar from "../Components/Sidebar";
 import {
   Box,
   Flex,
-  Image,
   Text,
-  Heading,
-  Icon,
-  Button,
-  InputRightElement,
   Input,
+  Image,
   InputGroup,
+  InputRightElement,
+  Heading,
 } from "@chakra-ui/react";
+import { SearchIcon } from "@chakra-ui/icons";
 import { useQuery } from "@apollo/client";
-import Sidebar from "../Components/Sidebar";
-import { FiSearch } from "react-icons/fi";
-import Loading from "../Components/Loading";
+import { debounce } from "lodash";
 import { GET_ALL_SONGS } from "../ApiFunctions/getSongsQuery";
+import Loading from "../Components/Loading";
+import MusicPlayer from "./Player";
 
-const Foryou = ({ artistId }) => {
+const ForYou = ({ playlistId }) => {
   const [toggleColor, setToggleColor] = useState(false);
-  const [inputBox, setInputBox] = useState("");
-  const [singleSongs, setsingleSongs] = useState({
-    _id: "61b6f14dc2f7cafd968c31f2",
-    title: "A Head Full Of Dreams",
-    artist: "Coldplay",
-    duration: 645,
+  const [activeIndex, SetactiveIndex] = useState(0);
+  const [inputSearchBox, setInputSearchBox] = useState("");
+  const [songIndex, setSongIndex] = useState(0);
+  const [currentSongIndex, setCurrentSongIndex] = useState(0);
+  /* Setting up default song if user doesn't click so this data will show to user */
+  const [Player, setPlayer] = useState({
+    artist: "Weeknd",
+    duration: 320,
     photo:
-      "https://i.pinimg.com/originals/1d/a7/9a/1da79a9ed751285378a05535ddb71ec8.png",
+      "https://images.genius.com/e95f361c27487088fd9dddf8c967bf89.500x500x1.jpg",
+    title: "Starboy",
     url: "https://storage.googleapis.com/similar_sentences/Imagine%20Dragons%20-%20West%20Coast%20(Pendona.com).mp3",
     __typename: "Song",
-  });
-  const { loading, error, data } = useQuery(GET_ALL_SONGS, {
-    variables: { playlistId: 1, search: inputBox },
+    _id: "61b6f14dc2f7cafd968c31f0",
   });
 
-  const handlClickOnSingleSongs = (singleSong) => {
-    setsingleSongs(singleSong);
+  /* Grabbing the data from API using userQuery hook  */
+  const { loading, error, data } = useQuery(GET_ALL_SONGS, {
+    variables: { playlistId: 1, search: inputSearchBox },
+  });
+
+  /* Setting up the songs value into states so we can send it to music player */
+  const handleSingleSongsClick = (song, index) => {
+    SetactiveIndex(index);
+    setPlayer(song);
+    setSongIndex(index);
+    setCurrentSongIndex(index);
     handleToggleColor();
   };
 
-  /* Deboucing for search box */
-  const debouncedHandleInputChange = debounce((value) => {
-    setInputBox(value);
-  }, 1000);
+  /* Deboucing using lodash  */
+  let handleDebounced = debounce((value) => {
+    setInputSearchBox(value);
+  }, 800);
 
-  const handleInputChange = (event) => {
-    const value = event.target.value;
-    debouncedHandleInputChange(value);
+  /* For Input search Box */
+  const handleSearch = (e) => {
+    let value = e.target.value;
+    handleDebounced(value);
   };
 
+  /* For sending the active songs and index */
+  const handleSendDataInMusic = (i) => {
+    SetactiveIndex(i);
+    setCurrentSongIndex(i);
+  };
+
+  /* For toggle color when user click on songs  */
   const handleToggleColor = () => {
     setToggleColor(!toggleColor);
   };
 
   if (loading) return <Loading />;
-  if (error) return <p>Error :(</p>;
+  if (error) return <p>Error {error.message}</p>;
   return (
     <Box
       color={"white"}
@@ -64,112 +81,99 @@ const Foryou = ({ artistId }) => {
           ? "linear-gradient(to bottom, rgb(29,38,54), rgb(2,2,3))"
           : "linear-gradient(to bottom, rgb(27,19,5), rgb(20,14,4))"
       }
+      backgroundSize="cover"
+      h={"auto"}
     >
-      <Flex display={{ lg: "flex", sm: "block", md: "block" }}>
+      <Flex
+        display={{
+          lg: "flex",
+          sm: "block",
+        }}
+      >
         <Sidebar />
         <Flex
-          display={{ lg: "flex", sm: "block", md: "block" }}
-          w={"75%"}
-          px="1rem"
+          mt={"2rem"}
+          w={"100%"}
+          display={{ sm: "block", md: "block", lg: "flex" }}
+          px={"1rem"}
           justifyContent={"space-between"}
         >
           <Box
-            border="1px solid black"
-            w={{ lg: "40%", md: "100%", sm: "100%" }}
-            mt={8}
+            w={{
+              lg: "50%",
+              sm: "100%",
+              md: "100%",
+            }}
           >
-            <Heading mb={"1rem"} textAlign={"left"}>
-              For you
-            </Heading>
-            <Box mt={6}>
-              <InputGroup>
+            <Box mb="30px">
+              <Heading fontSize={"30px"} textAlign={"left"}>
+                For You
+              </Heading>
+
+              <InputGroup mt={10}>
                 <Input
-                  type="search"
-                  placeholder="Search Songs, Artist.."
-                  background={
-                    toggleColor
-                      ? "linear-gradient(to bottom, rgb(29,38,54), rgb(2,2,3))"
-                      : "linear-gradient(to bottom, rgb(27,19,5), rgb(20,14,4))"
-                  }
-                  _placeholder={{ color: "rgb(170,167,162)", fontSize: "18px" }}
                   border={"none"}
-                  py={6}
-                  onChange={handleInputChange}
+                  backgroundColor={"rgba(255, 255, 255, 0.08)"}
+                  onChange={(e) => handleSearch(e)}
+                  w={"550px"}
+                  placeholder="Search Song, Artist"
+                  py={3}
+                  px={4}
+                  borderRadius={"8px"}
                 />
-                <InputRightElement width="4.5rem">
-                  <Button variant={"link"} size="lg">
-                    <Icon
-                      as={FiSearch}
-                      color="rgb(170,167,162)"
-                      boxSize={6}
-                      mt={2}
-                    />
-                  </Button>
-                </InputRightElement>
+                <InputRightElement
+                  w={"4.5rem"}
+                  children={
+                    <SearchIcon boxSize={5} mt={2} opacity={"0.2"} mb={2} />
+                  }
+                />
               </InputGroup>
             </Box>
-            <Box mt={"40px"}>
-              {data.getSongs?.map((songs) => (
-                <Flex
-                  cursor={"pointer"}
-                  mb={"1rem"}
-                  justifyContent={"space-between"}
-                  key={songs._id}
-                  onClick={() => handlClickOnSingleSongs(songs)}
-                >
-                  <Flex>
-                    <Image
-                      borderRadius={"full"}
-                      boxSize={"40px"}
-                      objectFit={"cover"}
-                      src={songs.photo}
-                    />
-                    <Box ml="1rem">
-                      <Text
-                        fontSize={"1rem"}
-                        fontWeight={"bold"}
-                        textAlign={"left"}
-                      >
-                        {songs.title}
-                      </Text>
-                      <Text textAlign={"left"}>{songs.artist}</Text>
-                    </Box>
-                  </Flex>
-                  <Text>{(songs.duration / 60).toFixed(2)}</Text>
+            {data.getSongs?.map((songs, index) => (
+              <Flex
+                px="1rem"
+                py="0.5rem"
+                borderRadius={"8px"}
+                bg={index === activeIndex ? "rgba(255, 255, 255, 0.08)" : ""}
+                cursor={"pointer"}
+                mb={"1rem"}
+                justifyContent={"space-between"}
+                key={songs._id}
+                onClick={() => handleSingleSongsClick(songs, index)}
+              >
+                <Flex>
+                  <Image
+                    borderRadius={"full"}
+                    boxSize={"40px"}
+                    objectFit={"cover"}
+                    src={songs.photo}
+                  />
+                  <Box ml="1rem">
+                    <Text
+                      fontSize={"1rem"}
+                      fontWeight={"bold"}
+                      textAlign={"left"}
+                    >
+                      {songs.title}
+                    </Text>
+                    <Text textAlign={"left"}>{songs.artist}</Text>
+                  </Box>
                 </Flex>
-              ))}
-            </Box>
+                <Text>{(songs.duration / 60).toFixed(2)}</Text>
+              </Flex>
+            ))}
           </Box>
-          <Box px="1rem" w={{ lg: "50%", md: "100%", sm: "100%" }} mt={14}>
-            <Text
-              fontSize={"2rem"}
-              fontWeight={"bold"}
-              fontStyle={"Gotham Circular"}
-              textAlign={"left"}
-            >
-              {singleSongs.title}
-            </Text>
-            <Text fontWeight={"bold"} fontSize={"1.2rem"} textAlign={"left"}>
-              {singleSongs.artist}
-            </Text>
-            <Flex direction={"column"} gap={10} alignItems={"center"}>
-              <Image
-                mt={"1rem"}
-                borderRadius={"10px"}
-                w="500px"
-                h="450px"
-                src={singleSongs.photo}
-              />
-              <audio controls>
-                <source src={singleSongs.url} type="audio/ogg" />
-                Your browser does not support the audio tag.
-              </audio>
-            </Flex>
-          </Box>
+
+          <MusicPlayer
+            CurrentPlayingSong={Player}
+            data={data.getSongs}
+            index={songIndex}
+            handleSendDataInMusic={handleSendDataInMusic}
+          />
         </Flex>
       </Flex>
     </Box>
   );
 };
 
-export default Foryou;
+export default ForYou;

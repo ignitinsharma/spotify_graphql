@@ -4,36 +4,28 @@ import {
   Box,
   CloseButton,
   Flex,
-  useColorModeValue,
+  Icon,
+  Link,
   Drawer,
   DrawerContent,
   Text,
   useDisclosure,
   Image,
 } from "@chakra-ui/react";
-import {
-  FiHome,
-  FiTrendingUp,
-  FiCompass,
-  FiSettings,
-  FiMenu,
-} from "react-icons/fi";
-import { NavLink, useNavigate } from "react-router-dom";
+import { FiMenu } from "react-icons/fi";
+import { NavLink } from "react-router-dom";
 
 const LinkItems = [
-  { name: "For You", icon: FiHome, path: "/" },
-  { name: "Top Tracks", icon: FiTrendingUp, path: "/top" },
-  { name: "Favorites", icon: FiCompass, path: "/favourites" },
-  { name: "Recently Played", icon: FiSettings, path: "/recent" },
+  { name: "For You", path: "/" },
+  { name: "Top Tracks", path: "/top" },
+  { name: "Favourites", path: "/favourites" },
+  { name: "Recently Played", path: "/recent" },
 ];
 
-export default function SidebarComponent({ children }) {
+export default function Sidebar({ children }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   return (
-    <Flex
-      background="linear-gradient(to bottom, rgb(27,19,5), rgb(20,14,4))"
-      minH="100vh"
-    >
+    <Box minH="100vh" color={"white"}>
       <SidebarContent
         onClose={() => onClose}
         display={{ base: "none", md: "block" }}
@@ -45,72 +37,112 @@ export default function SidebarComponent({ children }) {
         onClose={onClose}
         returnFocusOnClose={false}
         onOverlayClick={onClose}
-        size="full"
+        size="xs"
       >
         <DrawerContent>
           <SidebarContent onClose={onClose} />
         </DrawerContent>
       </Drawer>
-      {/* mobilenav */}
       <MobileNav display={{ base: "flex", md: "none" }} onOpen={onOpen} />
       <Box ml={{ base: 0, md: 60 }} p="4">
         {children}
       </Box>
-    </Flex>
+    </Box>
   );
 }
 
 const SidebarContent = ({ onClose, ...rest }) => {
-  const navigate = useNavigate();
   return (
     <Box
-      background="linear-gradient(to bottom, rgb(27,19,5), rgb(20,14,4))"
-      borderRight="1px"
-      borderRightColor={useColorModeValue("gray.200", "gray.700")}
-      w={{ base: "full", md: 60, sm: "full" }}
+      backgroundColor={{
+        base: "rgb(26,18,5)",
+        sm: "rgb(26,18,5)",
+        lg: "transparent",
+      }}
+      color={"white"}
+      w={{ base: "full", md: 60 }}
       pos="fixed"
       h="full"
       {...rest}
     >
-      {/* <Link to="/"> */}
       <Flex h="20" alignItems="center" mx="8" justifyContent="space-between">
-        <Image
-          cursor={"pointer"}
-          onClick={() => navigate("/")}
-          w={"160px"}
-          h={"50px"}
-          src="https://storage.googleapis.com/pr-newsroom-wp/1/2018/11/Spotify_Logo_RGB_White.png"
-        />
+        <a href="/">
+          <Image
+            cursor={"pointer"}
+            w={"160px"}
+            h={"50px"}
+            src="https://storage.googleapis.com/pr-newsroom-wp/1/2018/11/Spotify_Logo_RGB_White.png"
+          />
+        </a>
         <CloseButton display={{ base: "flex", md: "none" }} onClick={onClose} />
       </Flex>
-      {/* </Link> */}
       {LinkItems.map((item, index) => (
-        <Box pl={"2.5rem"} key={index}>
-          <NavLink to={item.path}>
-            <Text
-              color={"white"}
-              mt={"5px"}
-              fontSize={"1rem"}
-              style={{ fontWeight: "500" }}
-            >
-              {item.name}
-            </Text>
+        <Text
+          key={index}
+          textAlign={"left"}
+          px={"2rem"}
+          py={"0.2rem"}
+          mt={1}
+          fontSize={"17px"}
+        >
+          <NavLink
+            to={item.path}
+            style={({ isActive }) => {
+              return isActive ? { opacity: "100" } : { opacity: 0.4 };
+            }}
+          >
+            {item.name}
           </NavLink>
-        </Box>
+        </Text>
       ))}
     </Box>
   );
 };
 
+const NavItem = ({ icon, children, ...rest }) => {
+  return (
+    <Link
+      href="#"
+      style={{ textDecoration: "none" }}
+      _focus={{ boxShadow: "none" }}
+    >
+      <Flex
+        align="center"
+        p="4"
+        borderRadius="lg"
+        role="group"
+        cursor="pointer"
+        _hover={{
+          bg: "cyan.400",
+          color: "white",
+        }}
+        {...rest}
+      >
+        {icon && (
+          <Icon
+            mr="4"
+            fontSize="16"
+            _groupHover={{
+              color: "white",
+            }}
+            as={icon}
+          />
+        )}
+        {children}
+      </Flex>
+    </Link>
+  );
+};
+
 const MobileNav = ({ onOpen, ...rest }) => {
   return (
-    <Flex
+    <Box
       ml={{ base: 0, md: 60 }}
       px={{ base: 4, md: 24 }}
-      height="20"
+      height="auto"
       alignItems="center"
-      borderBottomWidth="1px"
-      borderBottomColor={useColorModeValue("gray.200", "gray.700")}
+      pos={"sticky"}
+      top={0}
       justifyContent="flex-start"
       {...rest}
     >
@@ -120,6 +152,6 @@ const MobileNav = ({ onOpen, ...rest }) => {
         aria-label="open menu"
         icon={<FiMenu />}
       />
-    </Flex>
+    </Box>
   );
 };

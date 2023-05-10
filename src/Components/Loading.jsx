@@ -23,7 +23,7 @@ const Loading = () => {
           color="green.500"
           size="xl"
         />
-        <Heading color={"white"}>Loading...😁</Heading>
+        <Heading color={"white"}>Loading..🤐</Heading>
       </Box>
     </Box>
   );
